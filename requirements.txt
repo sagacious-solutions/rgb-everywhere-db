@@ -1,0 +1,5 @@
+SQLAlchemy==1.4.45
+python-dotenv==0.21.0
+psycopg2==2.9.5
+Flask==2.2.2
+pytest==7.2.0
