@@ -8,7 +8,8 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 secrets = dotenv_values(".env")
 
-class Database :
+
+class Database:
     def __init__(self, url):
         self.engine = create_engine(url, echo=True)
         Session = sessionmaker(bind=self.engine)
