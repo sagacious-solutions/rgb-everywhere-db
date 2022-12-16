@@ -26,5 +26,13 @@ def get_devices():
 
     return jsonify(response_dict)
 
+@app.route("/putNewDevice/", methods=["POST"])
+def add_new_device():
+    data = request.json
+    log.info(data)
+    db.add_device(data.get("device", {}))
+
+    return FlaskResponse("added to db", status=201)
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=6843)

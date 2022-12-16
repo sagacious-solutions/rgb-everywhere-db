@@ -12,7 +12,7 @@ class TestDevicesTable:
     def db(self):   
         print("this ran")
         db = Database(TEST_DB_URL)
-        db.delete_all_tables()
+        db.delete_device_table()
         db.create_tables()
         return db
     

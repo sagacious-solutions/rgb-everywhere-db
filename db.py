@@ -1,4 +1,5 @@
 
+from typing import Dict
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import models.device as device
@@ -16,14 +17,16 @@ class Database:
         self.session = Session()
         self.create_tables()
 
+    def add_device(self, new_device: Dict[str, str]):
+        new_db_entry = device.Device(**new_device)
+        self.session.add(new_db_entry)
+        self.session.commit()
+
     def create_tables(self):
         device.create_table(self.engine)
 
-    def delete_all_tables(self):
+    def delete_device_table(self):
         device.Device.__table__.drop(self.engine)
-
-    def commit(self):
-        self.session.commit()
 
     def get_all_devices(self):
         return self.session.query(device.Device)

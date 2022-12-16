@@ -29,9 +29,8 @@ class Device(Base):
         return temp_dict
 
 
-
 def create_table(engine):
     Base.metadata.create_all(engine)
 
 
-# christmas_tree = Device(name="Christmas Tree", color_mode="rgb", ip_address="192.168.1.211")
+christmas_tree = Device(name="Christmas Tree", color_mode="rgb", ip_address="192.168.1.211")
