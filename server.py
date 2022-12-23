@@ -13,9 +13,10 @@ log = config.log
 
 app = Flask(__name__)
 # cors = CORS(app, origins=config.secrets["CORS_ALLOWED_DOMAINS"])
-cors = CORS(app, origins='*')
+cors = CORS(app, origins="*")
 
 db = Database(config.secrets.get("db_url"))
+
 
 @app.route("/getDevices/", methods=["GET"])
 def get_devices():
@@ -26,6 +27,7 @@ def get_devices():
 
     return jsonify(response_dict)
 
+
 @app.route("/putNewDevice/", methods=["POST"])
 def add_new_device():
     data = request.json
@@ -34,5 +36,15 @@ def add_new_device():
 
     return FlaskResponse("added to db", status=201)
 
-if __name__ == '__main__':
+
+@app.route("/deleteDevice/", methods=["POST"])
+def delete_device():
+    data = request.json
+    log.info(data)
+    db.delete_device(data.get("device", {}))
+
+    return FlaskResponse("Deleted from db", status=201)
+
+
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=6843)
