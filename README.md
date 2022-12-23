@@ -1,4 +1,13 @@
-# DB Installation
+# RGB Everywhere Database
 
-1 ) sudo apt install libpq5
-2 )
+This is the database to store devices for RGB everywhere.
+
+# Tech Stack
+
+- Python
+- SQLAlchemy
+- Pytest
+
+# Database ERD
+
+<img src="./docs/db_erd.png" width="49%" />
