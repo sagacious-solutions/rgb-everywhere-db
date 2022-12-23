@@ -39,6 +39,9 @@ class Database:
         return devices[0]
 
     def update_device(self, device_to_update: Dict[str, str]):
+        if not device_to_update:
+            raise ValueError("No device was passed to update function.")
+
         update_entry = (
             Device.__table__.update()
             .where(
@@ -49,6 +52,7 @@ class Database:
         )
         self.session.execute(update_entry)
         self.session.commit()
+        return True
 
     def delete_device(self, device_to_delete: Dict[str, str]):
         delete_entry = Device.__table__.delete().where(

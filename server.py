@@ -31,10 +31,26 @@ def get_devices():
 @app.route("/putNewDevice/", methods=["POST"])
 def add_new_device():
     data = request.json
-    log.info(data)
     db.add_device(data.get("device", {}))
 
     return FlaskResponse("added to db", status=201)
+
+
+@app.route("/updateDevice/", methods=["POST"])
+def update_existing_device() -> FlaskResponse:
+    """Updates an existing device in the database
+
+    Returns:
+        FlaskResponse: Message and HTTP Status code
+    """
+    data = request.json
+    try:
+        db.update_device(data.get("device", None))
+    except ValueError as e:
+        log.exception(e)
+        return FlaskResponse("Device wasn't received", status=406)
+
+    return FlaskResponse("Added to db", status=201)
 
 
 @app.route("/deleteDevice/", methods=["POST"])
