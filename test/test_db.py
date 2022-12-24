@@ -2,15 +2,16 @@ import pytest
 from db import Database
 from dotenv import dotenv_values
 from models.device import Device
+import config
 
 secrets = dotenv_values(".env")
-TEST_DB_URL = secrets.get("test_db_url")
+# TEST_DB_URL = secrets.get("test_db_url")
+TEST_DB_URL = config.TEST_DB_URL
 
 
 class TestDevicesTable:
     @pytest.fixture(scope="class")
     def db(self):
-        print("this ran")
         db = Database(TEST_DB_URL)
         db.delete_device_table()
         db.create_tables()
