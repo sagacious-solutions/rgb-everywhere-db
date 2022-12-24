@@ -12,10 +12,9 @@ import config
 log = config.log
 
 app = Flask(__name__)
-# cors = CORS(app, origins=config.secrets["CORS_ALLOWED_DOMAINS"])
 cors = CORS(app, origins="*")
 
-db = Database(config.secrets.get("db_url"))
+db = Database(config.DB_CONNECT_STR)
 
 
 @app.route("/getDevices/", methods=["GET"])

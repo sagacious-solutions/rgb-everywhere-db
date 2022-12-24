@@ -1,17 +1,14 @@
+from pathlib import Path
 import pytest
 from db import Database
-from dotenv import dotenv_values
 from models.device import Device
-
-secrets = dotenv_values(".env")
-TEST_DB_URL = secrets.get("test_db_url")
+import config
 
 
 class TestDevicesTable:
     @pytest.fixture(scope="class")
     def db(self):
-        print("this ran")
-        db = Database(TEST_DB_URL)
+        db = Database(config.TEST_DB_CONNECT_STR)
         db.delete_device_table()
         db.create_tables()
         return db
@@ -20,6 +17,11 @@ class TestDevicesTable:
     def close_connection(self, db):
         yield
         db.close_connection()
+
+    @pytest.fixture(autouse=True, scope="class")
+    def delete_db_file(self):
+        yield
+        config.TEST_DB_PATH.unlink()
 
     @pytest.fixture(autouse=True, scope="class")
     def seed_fake_data(self, db):
