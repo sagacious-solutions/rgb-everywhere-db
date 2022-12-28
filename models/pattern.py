@@ -10,6 +10,9 @@ class Pattern(Base):
     id = Column(Integer, primary_key=True)
     data = Column(JSON)
 
+    def get_pattern(self):
+        return self.data.get("pattern")
+
 
 def create_table(engine):
     Base.metadata.create_all(engine)
