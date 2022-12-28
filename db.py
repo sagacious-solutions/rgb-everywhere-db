@@ -15,8 +15,8 @@ secrets = dotenv_values(".env")
 class Database:
     def __init__(self, url):
         self.engine = create_engine(url, echo=True)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
         self.create_tables()
 
     def add_device(self, new_device: Dict[str, str]):
@@ -123,10 +123,12 @@ class Database:
         pattern.Pattern.__table__.drop(self.engine)
 
     def get_all_devices(self):
-        return self.session.query(device.Device)
+        session = self.Session()
+        return session.query(device.Device)
 
     def get_all_patterns(self):
-        return self.session.query(pattern.Pattern)
+        session = self.Session()
+        return session.query(pattern.Pattern)
 
     def close_connection(self):
         self.session.close()
