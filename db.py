@@ -1,8 +1,10 @@
-from typing import Dict
+from typing import Dict, List
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 import models.device as device
+import models.pattern as pattern
 from models.device import Device
+from models.pattern import Pattern
 from dotenv import dotenv_values
 from sqlalchemy.orm import declarative_base
 
@@ -26,6 +28,23 @@ class Database:
         new_db_entry = device.Device(**new_device)
         self.session.add(new_db_entry)
         self.session.commit()
+
+    def add_pattern(self, new_pattern: List[List[int]]):
+        self.__check_pattern_valid(new_pattern)
+        new_db_entry = pattern.Pattern(data={"pattern": new_pattern})
+        self.session.add(new_db_entry)
+        self.session.commit()
+
+    def __check_pattern_valid(self, new_pattern: List[List[int]]):
+        if not type(new_pattern) == list:
+            raise ValueError(
+                "Argument new_pattern must be a List of list of integers"
+            )
+        for value in new_pattern:
+            if not type(value) == list or not len(value) == 3:
+                raise ValueError(
+                    "Argument new_pattern must be a List of lists of 3 integers"
+                )
 
     def get_device(self, ip_address: str) -> Device:
         """Gets a specific device by IP address from the database
@@ -95,12 +114,19 @@ class Database:
 
     def create_tables(self):
         device.create_table(self.engine)
+        pattern.create_table(self.engine)
 
     def delete_device_table(self):
         device.Device.__table__.drop(self.engine)
 
+    def delete_pattern_table(self):
+        pattern.Pattern.__table__.drop(self.engine)
+
     def get_all_devices(self):
         return self.session.query(device.Device)
+
+    def get_all_patterns(self):
+        return self.session.query(pattern.Pattern)
 
     def close_connection(self):
         self.session.close()
