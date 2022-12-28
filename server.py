@@ -17,6 +17,19 @@ cors = CORS(app, origins="*")
 db = Database(config.DB_CONNECT_STR)
 
 
+@app.route("/putNewPattern/", methods=["POST"])
+def add_new_device():
+    data = request.json
+    try:
+        db.add_pattern(data.get("pattern", None))
+    except ValueError:
+        return FlaskResponse(
+            "Invalid formatted data provided for pattern", status=406
+        )
+
+    return FlaskResponse("added pattern to db", status=201)
+
+
 @app.route("/getDevices/", methods=["GET"])
 def get_devices():
     response_dict = {}
