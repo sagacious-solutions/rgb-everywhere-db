@@ -18,7 +18,7 @@ db = Database(config.DB_CONNECT_STR)
 
 
 @app.route("/putNewPattern/", methods=["POST"])
-def add_new_device():
+def add_new_pattern():
     data = request.json
     try:
         db.add_pattern(data.get("pattern", None))
@@ -28,6 +28,16 @@ def add_new_device():
         )
 
     return FlaskResponse("added pattern to db", status=201)
+
+
+@app.route("/getPatterns/", methods=["GET"])
+def get_patterns():
+    response_dict = {}
+    patterns = db.get_all_patterns()
+    for i, pattern in enumerate(patterns):
+        response_dict[str(i)] = pattern.get_pattern()
+
+    return jsonify(response_dict)
 
 
 @app.route("/getDevices/", methods=["GET"])
