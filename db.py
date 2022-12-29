@@ -14,7 +14,10 @@ secrets = dotenv_values(".env")
 
 class Database:
     def __init__(self, url):
-        self.engine = create_engine(url, echo=True)
+        self.engine = create_engine(
+            url,
+            echo=True,
+        )
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
         self.create_tables()
