@@ -7,6 +7,8 @@ from models.device import Device
 from models.pattern import Pattern
 from dotenv import dotenv_values
 from sqlalchemy.orm import declarative_base
+from config import log
+
 
 Base = declarative_base()
 secrets = dotenv_values(".env")
@@ -98,6 +100,38 @@ class Database:
             .values(**device_to_update)
         )
         self.session.execute(update_entry)
+        self.session.commit()
+
+    def update_pattern(self, old_pattern, new_pattern):
+        if not old_pattern or not new_pattern:
+            raise ValueError("No pattern was passed to update function.")
+
+        log.debug(
+            "Update existing pattern. \nold_pattern:"
+            f" {old_pattern}\nnew_pattern: {new_pattern} "
+        )
+
+        update_entry = (
+            Pattern.__table__.update()
+            .where(Pattern.__table__.c.data == {"pattern": old_pattern})
+            .values(data={"pattern": new_pattern})
+        )
+        self.session.execute(update_entry)
+        self.session.commit()
+
+    def delete_pattern(self, pattern_to_delete: Dict[str, str]):
+        """Deletes a device from the provided dict from the database.
+
+        It will use the ip_address key to locate the item
+
+        Args:
+            device_to_delete (Dict[str, str]): Device to delete, must have a ip_address
+                key
+        """
+        delete_entry = Pattern.__table__.delete().where(
+            Pattern.__table__.c.data == pattern_to_delete
+        )
+        self.session.execute(delete_entry)
         self.session.commit()
 
     def delete_device(self, device_to_delete: Dict[str, str]):
