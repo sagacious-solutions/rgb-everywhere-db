@@ -1,10 +1,14 @@
-from typing import Dict
+from typing import Dict, List
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 import models.device as device
+import models.pattern as pattern
 from models.device import Device
+from models.pattern import Pattern
 from dotenv import dotenv_values
 from sqlalchemy.orm import declarative_base
+from config import log
+
 
 Base = declarative_base()
 secrets = dotenv_values(".env")
@@ -12,9 +16,12 @@ secrets = dotenv_values(".env")
 
 class Database:
     def __init__(self, url):
-        self.engine = create_engine(url, echo=True)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        self.engine = create_engine(
+            url,
+            echo=True,
+        )
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
         self.create_tables()
 
     def add_device(self, new_device: Dict[str, str]):
@@ -26,6 +33,23 @@ class Database:
         new_db_entry = device.Device(**new_device)
         self.session.add(new_db_entry)
         self.session.commit()
+
+    def add_pattern(self, new_pattern: List[List[int]]):
+        self.__check_pattern_valid(new_pattern)
+        new_db_entry = pattern.Pattern(data={"pattern": new_pattern})
+        self.session.add(new_db_entry)
+        self.session.commit()
+
+    def __check_pattern_valid(self, new_pattern: List[List[int]]):
+        if not type(new_pattern) == list:
+            raise ValueError(
+                "Argument new_pattern must be a List of list of integers"
+            )
+        for value in new_pattern:
+            if not type(value) == list or not len(value) == 3:
+                raise ValueError(
+                    "Argument new_pattern must be a List of lists of 3 integers"
+                )
 
     def get_device(self, ip_address: str) -> Device:
         """Gets a specific device by IP address from the database
@@ -78,6 +102,38 @@ class Database:
         self.session.execute(update_entry)
         self.session.commit()
 
+    def update_pattern(self, old_pattern, new_pattern):
+        if not old_pattern or not new_pattern:
+            raise ValueError("No pattern was passed to update function.")
+
+        log.debug(
+            "Update existing pattern. \nold_pattern:"
+            f" {old_pattern}\nnew_pattern: {new_pattern} "
+        )
+
+        update_entry = (
+            Pattern.__table__.update()
+            .where(Pattern.__table__.c.data == {"pattern": old_pattern})
+            .values(data={"pattern": new_pattern})
+        )
+        self.session.execute(update_entry)
+        self.session.commit()
+
+    def delete_pattern(self, pattern_to_delete: Dict[str, str]):
+        """Deletes a device from the provided dict from the database.
+
+        It will use the ip_address key to locate the item
+
+        Args:
+            device_to_delete (Dict[str, str]): Device to delete, must have a ip_address
+                key
+        """
+        delete_entry = Pattern.__table__.delete().where(
+            Pattern.__table__.c.data == pattern_to_delete
+        )
+        self.session.execute(delete_entry)
+        self.session.commit()
+
     def delete_device(self, device_to_delete: Dict[str, str]):
         """Deletes a device from the provided dict from the database.
 
@@ -95,12 +151,21 @@ class Database:
 
     def create_tables(self):
         device.create_table(self.engine)
+        pattern.create_table(self.engine)
 
     def delete_device_table(self):
         device.Device.__table__.drop(self.engine)
 
+    def delete_pattern_table(self):
+        pattern.Pattern.__table__.drop(self.engine)
+
     def get_all_devices(self):
-        return self.session.query(device.Device)
+        session = self.Session()
+        return session.query(device.Device)
+
+    def get_all_patterns(self):
+        session = self.Session()
+        return session.query(pattern.Pattern)
 
     def close_connection(self):
         self.session.close()
